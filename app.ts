@@ -60,27 +60,29 @@ app.post('/myaction', function(req, res) {
 
 app.post('/myaction1', function(req, res) {
   var userName1 = req.body.username1;
-  // var password1 = req.body.password;
+  var password1 = req.body.password;
   res.send('You sent the username "' + req.body.username1 + '" new password "' + req.body.newPassword + '" and confirm new password as "' + req.body.confirmNewPassword + '" .If, both passwords entered are same only then the password will be reseted successfully, if not the password reset is failed');
   createConnection().then(async connection => {               //<--------------
+    let userRepository = connection.getRepository(User);
 
     console.log("Updating or adding a new user into the database..."); //<-------------
     const user = new User();                                  //<-------------
-    let userNamedb = await user.findOne({
-      plain: true, //ignores any extra information returned by Sequelize ORM
-      where: {
-        userName: userName1
-      }
-    });
+    let userNamedb = await userRepository.findOne({ userName: userName1 });
+    console.log(userNamedb, "jawhbdkbawkdbajwk");
+    //let userNamedb = await connection.manager.findOne({ userName: "as"});
+    // userNamedb.password = password1;
+    if(userNamedb != null){
     if( req.body.newPassword == req.body.confirmNewPassword){
-    user.userName = req.body.username1;                                //<-------------
-    user.password = req.body.newPassword;                                    //<-------------
+    //userNamedb.userName = req.body.username1;                                //<-------------
+    userNamedb.password = req.body.newPassword;                                    //<-------------
     // user.age = 28;                                            //<-------------
-    await connection.manager.save(user);                      //<-------------
+    await connection.manager.save(userNamedb);                      //<-------------
     }
     else{
       console.log('The new password does not match with the confirm new password ');
     }
+   }
+   else{console.log("Enter valid email");}
 
     //console.log("Saved a new user with id: " + user.id);      //<-------------
   
